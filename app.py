@@ -2,37 +2,36 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-st.set_page_config(page_title="Predict Group", layout="centered")
+st.set_page_config(page_title="Group Predictor", layout="centered")
 
-# Load pre-trained model
+# Load trained model
 @st.cache_resource
 def load_model():
     with open("random_forest_model.pkl", "rb") as f:
-        model = pickle.load(f)
-    return model
+        return pickle.load(f)
 
 model = load_model()
 
-# Define expected features and ranges (example values — change these to match your model!)
-feature_info = {
-    "tempo": (60, 200, 120),
-    "energy": (0.0, 1.0, 0.5),
-    "danceability": (0.0, 1.0, 0.5),
-    "valence": (0.0, 1.0, 0.5),
-    "loudness": (-60, 0, -20)
-}
+# Feature columns from the dataset (exclude target labels)
+feature_names = [
+    'Age', 'Hours per day', 'While working', 'Instrumentalist', 'Composer',
+    'Foreign languages', 'Frequency [Classical]', 'Frequency [Country]',
+    'Frequency [EDM]', 'Frequency [Folk]', 'Frequency [Gospel]',
+    'Frequency [Hip hop]', 'Frequency [Jazz]', 'Frequency [K pop]',
+    'Frequency [Latin]', 'Frequency [Lofi]', 'Frequency [Metal]',
+    'Frequency [Pop]', 'Frequency [R&B]', 'Frequency [Rap]',
+    'Frequency [Rock]', 'Frequency [Video game music]'
+]
 
-# UI
-st.title("🎵 Predict Group / Genre from Features")
-st.sidebar.header("🔢 Enter Song Features")
-
+# Sidebar input
+st.sidebar.header("🎧 Input Features")
 input_data = {}
-for feature, (min_val, max_val, default_val) in feature_info.items():
+for feature in feature_names:
     input_data[feature] = st.sidebar.number_input(
-        label=feature.capitalize(),
-        min_value=min_val,
-        max_value=max_val,
-        value=default_val
+        label=feature,
+        min_value=0.0,
+        max_value=10.0,
+        value=5.0
     )
 
 # Prediction
@@ -40,5 +39,6 @@ input_df = pd.DataFrame([input_data])
 prediction = model.predict(input_df)[0]
 
 # Output
-st.subheader("🧠 Prediction Result")
-st.write(f"Predicted Group/Genre: **{prediction}**")
+st.title("🎯 Cluster Group Prediction")
+st.write("Based on your input features:")
+st.write(f"**Predicted Cluster Group:** `{prediction}`")
