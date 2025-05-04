@@ -29,9 +29,9 @@ input_data = {}
 for feature in feature_names:
     input_data[feature] = st.sidebar.number_input(
         label=feature,
-        min_value=0.0,
-        max_value=10.0,
-        value=5.0
+        min_value=0,
+        max_value=10,
+        value=5
     )
 
 # Prediction
