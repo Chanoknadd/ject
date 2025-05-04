@@ -2,9 +2,8 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-st.set_page_config(page_title="Group Predictor", layout="centered")
+st.set_page_config(page_title="Genre to Cluster Predictor", layout="centered")
 
-# Load trained model
 @st.cache_resource
 def load_model():
     with open("random_forest_model.pkl", "rb") as f:
@@ -12,33 +11,27 @@ def load_model():
 
 model = load_model()
 
-# Feature columns from the dataset (exclude target labels)
-feature_names = [
-    'Age', 'Hours per day', 'While working', 'Instrumentalist', 'Composer',
-    'Foreign languages', 'Frequency [Classical]', 'Frequency [Country]',
-    'Frequency [EDM]', 'Frequency [Folk]', 'Frequency [Gospel]',
-    'Frequency [Hip hop]', 'Frequency [Jazz]', 'Frequency [K pop]',
-    'Frequency [Latin]', 'Frequency [Lofi]', 'Frequency [Metal]',
-    'Frequency [Pop]', 'Frequency [R&B]', 'Frequency [Rap]',
-    'Frequency [Rock]', 'Frequency [Video game music]'
-]
+# Example genre-label mapping (update based on your actual encoding)
+genre_map = {
+    0: 'Classical', 1: 'Country', 2: 'EDM', 3: 'Folk', 4: 'Gospel',
+    5: 'Hip hop', 6: 'Jazz', 7: 'K pop', 8: 'Latin', 9: 'Lofi',
+    10: 'Metal', 11: 'Pop', 12: 'R&B', 13: 'Rap', 14: 'Rock', 15: 'Video game music'
+}
+genre_to_label = {v: k for k, v in genre_map.items()}
 
-# Sidebar input
-st.sidebar.header("🎧 Input Features")
-input_data = {}
-for feature in feature_names:
-    input_data[feature] = st.sidebar.number_input(
-        label=feature,
-        min_value=0,
-        max_value=10,
-        value=5
-    )
+# UI
+st.title("🎵 Predict Cluster Group from Favorite Genre")
 
-# Prediction
-input_df = pd.DataFrame([input_data])
+selected_genre = st.selectbox("Select your favorite genre:", list(genre_to_label.keys()))
+
+# Convert to model input
+input_label = genre_to_label[selected_genre]
+input_df = pd.DataFrame([{"Fav genre_Label": input_label}])
+
+# Predict
 prediction = model.predict(input_df)[0]
 
 # Output
-st.title("🎯 Cluster Group Prediction")
-st.write("Based on your input features:")
-st.write(f"**Predicted Cluster Group:** `{prediction}`")
+st.subheader("🧠 Prediction Result")
+st.write(f"Favorite Genre: **{selected_genre}**")
+st.write(f"Predicted Cluster Group: **{prediction}**")
